@@ -2,7 +2,7 @@
 /*
 Plugin Name: Give - Simple Anonymous Field
 Plugin URI:  https://github.com/squarecandy/give-simple-fields
-Description: Simply adds a note or comment field to the Give donations plugin.
+Description: Simply adds a "Please make this donation anonymous." checkbox field to the Give donations plugin.
 Version:	 1.0
 Author:	  Square Candy
 Author URI:  http://squarecandy.net
