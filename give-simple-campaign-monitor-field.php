@@ -2,7 +2,7 @@
 /*
 Plugin Name: Give - Simple Campaign Monitor Field
 Plugin URI:  https://github.com/squarecandy/give-simple-fields
-Description: Simply adds a note or comment field to the Give donations plugin.
+Description: Add users to a Campaign Monitor account automatically if they keep the "please add me to the email list" box checked.
 Version:	 1.0
 Author:	  Square Candy
 Author URI:  http://squarecandy.net
@@ -27,9 +27,9 @@ function give_simple_campaign_monitor_field_squarecandy( $form_id ) {
 }
 add_action( 'give_donation_form_before_cc_form', 'give_simple_campaign_monitor_field_squarecandy', 10, 1 );
 
-function give_simple_campaign_monitor_field_squarecandy_store( $payment_meta ) {
-	$payment_meta['give_simple_campaign_monitor_field'] = isset( $_POST['give_simple_campaign_monitor_field'] ) ? implode( "\n", array_map( 'sanitize_text_field', explode( "\n", $_POST['give_simple_campaign_monitor_field'] ) ) ) : '';
-	echo '<script>alert("add this: ' . $payment_meta['give_email'] . '");</script>';
-	return $payment_meta;
+
+function give_simple_campaign_monitor_field_squarecandy_store( $_POST, $user_info, $valid_data ) {
+	print '<script>alert("test");</script>';
+	return false;
 }
-add_filter( 'give_payment_meta', 'give_simple_campaign_monitor_field_squarecandy_store', 10, 2 );
+add_filter( 'give_checkout_before_gateway', 'give_simple_campaign_monitor_field_squarecandy_store', 10, 2 );
