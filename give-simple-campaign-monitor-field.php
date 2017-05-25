@@ -1,20 +1,24 @@
 <?php
 /*
-Plugin Name: Give - Simple Campaign Monitor Field
+Plugin Name: Give - Simple Candy Mail Checkbox
 Plugin URI:  https://github.com/squarecandy/give-simple-fields
-Description: Add users to a Campaign Monitor account automatically if they keep the "please add me to the email list" box checked.
+Description: Add users to a Candy Mail (Campaign Monitor) account automatically if they keep the "please add me to the email list" box checked.
 Version:	 1.0
 Author:	  Square Candy
-Author URI:  http://squarecandy.net
+Author URI:  http://squarecandydesign.com
 License:	 GPLv3
 License URI: http://www.gnu.org/licenses/gpl.txt
 Text Domain: give-simple-campaign-monitor-field
 */
 
+// SETTINGS:
+define( 'CM_ACCOUNT_SLUG', 'squarecandydesign' );
+define( 'CM_URL_CODE', 'abcdef' );
+
 // don't let users activate w/o GIVE
 register_activation_hook( __FILE__, 'give_simple_campaign_monitor_field_activate' );
 function give_simple_campaign_monitor_field_activate(){
-	if ( is_plugin_active( 'give/give.php' ) ) {
+	if ( ! is_plugin_active( 'give/give.php' ) ) {
 
 		// check that ACF functions we need are available. Complain and bail out if they are not
 		wp_die('Sorry, the Simple Campaign Monitor Field Plugin requires the
@@ -44,18 +48,27 @@ function give_simple_campaign_monitor_field_squarecandy_store( $payment_meta ) {
 		isset( $_POST['give_simple_campaign_monitor_field'] ) &&
 		$_POST['give_simple_campaign_monitor_field'] == "on" ) :
 
+		// mark the user as signed up in the Give data
 		$payment_meta['give_simple_campaign_monitor_field'] = true;
 
-		// do the campaign monitor stuff...
+		// try to get the Campaign Monitor url code from options
+		// you can create an options field called "candy_mail_url_code"
+		// with ACF to use this feature
 		$cmid = get_field('candy_mail_url_code', 'options');
-
-		if ($cmid) {
+		$cmslug = get_field('candy_mail_account_slug', 'options');
+		if ( !$cmid ) {
+			$cmid = CM_URL_CODE;
+		}
+		if ( !$cmslug ) {
+			$cmslug = CM_ACCOUNT_SLUG;
+		}
+		if ( !empty($cmid) && !empty($cmslug) ) {
 
 			$content['cm-'.$cmid.'-'.$cmid] = $_POST['give_email'];
 			$content['cm-name'] = $_POST['give_first'] . " " . $_POST['give_last'];
 
 			// build the required data for the form
-			$url = 'https://squarecandydesign.createsend.com/t/r/s/' . $cmid . '/';
+			$url = 'https://' . $cmslug . '.createsend.com/t/r/s/' . $cmid . '/';
 			$headers = array('Content-Type' => 'application/x-www-form-urlencoded; charset=UTF-8');
 			$options = array('headers' => $headers, 'body' => $content, 'timeout' => '60');
 
