@@ -18,7 +18,7 @@ function give_simple_anon_field_squarecandy( $form_id ) {
 	<p id="give-simple-anon-field-container" class="form-row">
 		<label class="give-label" for="give-simple-anon-field">
 			<input type="checkbox" name="give_simple_anon_field" id="give-simple-anon-field">
-			<?php echo __( 'Please make this donation anonymous.', 'give-simple-anon-field' ); ?>
+			<?php echo __( 'Please make this donation anonymous.', 'give' ); ?>
 		</label>
 	</p>
 	<?php
@@ -27,26 +27,27 @@ add_action( 'give_donation_form_before_cc_form', 'give_simple_anon_field_squarec
 
 // Store the field submission in the database
 function give_simple_anon_field_squarecandy_store( $payment_meta ) {
-	$payment_meta['give_simple_anon_field'] = isset( $_POST['give_simple_anon_field'] ) ? implode( "n", array_map( 'sanitize_text_field', explode( "n", $_POST['give_simple_anon_field'] ) ) ) : '';
+	if ( isset( $_POST['give_simple_anon_field'] ) && $_POST['give_simple_anon_field'] == "on") {
+		$payment_meta['give_simple_anon_field'] = "true";
+	}
 	return $payment_meta;
 }
 add_filter( 'give_payment_meta', 'give_simple_anon_field_squarecandy_store' );
 
 // Display the field when viewing the transaction in the Dashboard
 function give_simple_anon_field_squarecandy_admin_display( $payment_meta, $user_info ) {
-	// Bounce out if no data for this transaction
-	if ( ! isset( $payment_meta['referral'] ) ) {
-		return;
-	}
-	if ( $payment_meta['give_simple_anon_field'] ) :
-	?>
-	<div class="give-simple-anon-field">
-		<p><?php echo __( 'Anonymous Donation', 'give-simple-anon-field' ); ?></p>
-	</div>
-	<?php
-	endif;
+	$payment_id = $_GET['id'];
+	$give_meta = get_post_meta( $payment_id, '_give_payment_meta', true );
+	// pre_r($give_meta);
+	// print $give_meta['give_simple_campaign_monitor_field_response']['body'];
+	if ( isset( $give_meta['give_simple_anon_field'] ) && $give_meta['give_simple_anon_field'] == "true" ) : ?>
+	<p class="give-simple-anon-field">
+		<strong><?php echo __( '⚠️ Anonymous Donation', 'give' ); ?></strong>
+	</p>
+	<?php endif;
 }
-add_action( 'give_payment_personal_details_list', 'give_simple_anon_field_squarecandy_admin_display', 10, 2 );
+add_action( 'give_payment_personal_details_list', 'give_simple_anon_field_squarecandy_admin_display', 15, 2 );
+
 
 // Make the field available to the Give email system
 function give_simple_anon_field_squarecandy_email_tag( $payment_id ) {
@@ -58,7 +59,7 @@ function give_simple_anon_field_squarecandy_data( $payment_id ) {
 	$payment_meta = give_get_payment_meta( $payment_id );
 	$output       = '';
 	if ( isset($payment_meta['give_simple_anon_field']) && $payment_meta['give_simple_anon_field'] ) {
-		$output = __( 'Anonymous Donation', 'give-simple-anon-field' );
+		$output = __( 'Anonymous Donation', 'give' );
 	}
 	return $output;
 }

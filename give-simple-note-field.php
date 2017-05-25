@@ -25,25 +25,26 @@ add_action( 'give_donation_form_after_cc_form', 'give_simple_note_field_squareca
 
 // Store the field submission in the database
 function give_simple_note_field_squarecandy_store( $payment_meta ) {
-	$payment_meta['give_simple_note_field'] = isset( $_POST['give_simple_note_field'] ) ? implode( "n", array_map( 'sanitize_text_field', explode( "n", $_POST['give_simple_note_field'] ) ) ) : '';
+	if ( isset( $_POST['give_simple_note_field'] ) ) {
+		$payment_meta['give_simple_note_field'] = esc_textarea( $_POST['give_simple_note_field'] );
+	}
 	return $payment_meta;
 }
-add_filter( 'give_payment_meta', 'give_simple_note_field_squarecandy_store' );
+add_filter( 'give_payment_meta', 'give_simple_note_field_squarecandy_store', 10 );
 
 // Display the field when viewing the transaction in the Dashboard
 function give_simple_note_field_squarecandy_admin_display( $payment_meta, $user_info ) {
-	// Bounce out if no data for this transaction
-	if ( ! isset( $payment_meta['referral'] ) ) {
-		return;
-	}
-	?>
-	<div class="give-simple-note-field">
-		<label><?php echo __( 'Note:', 'give-simple-note-field' ); ?></label>
-		<?php echo wpautop( $payment_meta['give_simple_note_field'] ); ?>
-	</div>
-<?php
+	$payment_id = $_GET['id'];
+	$give_meta = get_post_meta( $payment_id, '_give_payment_meta', true );
+	// pre_r($give_meta);
+	if ( isset( $give_meta['give_simple_note_field'] ) && !empty( $give_meta['give_simple_note_field'] ) ) : ?>
+	<p class="give-simple-note-field" style="margin: 1em 0;">
+		<strong><?php echo __( 'Donor Checkout Note:', 'give' ); ?></strong><br/>
+		<?php echo $give_meta['give_simple_note_field']; // echo wpautop( $give_meta['give_simple_note_field'] ); ?>
+	</p>
+	<?php endif;
 }
-add_action( 'give_payment_personal_details_list', 'give_simple_note_field_squarecandy_admin_display', 10, 2 );
+add_action( 'give_payment_personal_details_list', 'give_simple_note_field_squarecandy_admin_display', 5, 2 );
 
 // Make the field available to the Give email system
 function give_simple_note_field_squarecandy_email_tag( $payment_id ) {
