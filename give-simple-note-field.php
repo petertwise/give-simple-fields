@@ -11,6 +11,17 @@ License URI: http://www.gnu.org/licenses/gpl.txt
 Text Domain: give-simple-note-field
 */
 
+// don't let users activate w/o GIVE
+register_activation_hook( __FILE__, 'give_simple_note_field_activate' );
+function give_simple_note_field_activate(){
+	if ( is_plugin_active( 'give/give.php' ) ) {
+
+		// check that ACF functions we need are available. Complain and bail out if they are not
+		wp_die('Sorry, the Simple Note Field Plugin requires the
+			<a href="https://givewp.com/">Give Donations Plugin</a>.
+			<br><br><button onclick="window.history.back()">&laquo; back</button>');
+	}
+}
 
 // Add a "Note" field to all the Give forms
 function give_simple_note_field_squarecandy( $form_id ) {
